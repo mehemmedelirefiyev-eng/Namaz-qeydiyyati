@@ -1,239 +1,444 @@
 const todayElement = document.getElementById("today");
-const now = new Date();
-const today = now.toISOString().split("T")[0];
 const buttons = document.querySelectorAll(".check-btn");
+
 const statsBtn = document.getElementById("statsBtn");
-const editBtn = document.getElementById("editBtn");
-let editMode = false;
 const stats = document.getElementById("stats");
-const statsContent = document.getElementById("statsContent");
+
+const subhStat = document.getElementById("subhStat");
+const zohrStat = document.getElementById("zohrStat");
+const esrStat = document.getElementById("esrStat");
+const megribStat = document.getElementById("megribStat");
+const isaStat = document.getElementById("isaStat");
+
+const prevDay = document.getElementById("prevDay");
+const nextDay = document.getElementById("nextDay");
+
 const prevMonth = document.getElementById("prevMonth");
 const nextMonth = document.getElementById("nextMonth");
 const monthTitle = document.getElementById("monthTitle");
 
-let selectedMonth = today.substring(0, 7);
 
-const confirmBox = document.getElementById("confirmBox");
-const confirmText = document.getElementById("confirmText");
-const okBtn = document.getElementById("okBtn");
-const cancelBtn = document.getElementById("cancelBtn");
+const today = new Date().toISOString().split("T")[0];
 
-let selectedPrayer = "";
-let selectedButton = null;
+let selectedDate = today;
+let selectedMonth = today.substring(0,7);
 
-todayElement.textContent = "Tarix: " + today;
 
 let data = JSON.parse(localStorage.getItem("namazData")) || {};
-const monthKey = today.substring(0, 7);
 
-if (!data?.history) {
-    data.history = {};
+
+if(!data.firstDate){
+
+    data.firstDate = today;
+
 }
 
-if (!data.history[monthKey]) {
-    data.history[monthKey] = {
-        subh: 0,
-        zohr: 0,
-        esr: 0,
-        megrib: 0,
-        isa: 0,
-        completedDays: 0,
-        streak: 0,
-        bestStreak: 0
-    };
+
+if(!data.days){
+
+    data.days = {};
+
 }
 
-if (!data.prayers) {
-    data = {
-        date: today,
-        prayers: {
-            subh: false,
-            zohr: false,
-            esr: false,
-            megrib: false,
-            isa: false
-        },
-        history: {}
-    };
+
+
+function saveData(){
+
+    localStorage.setItem(
+        "namazData",
+        JSON.stringify(data)
+    );
+
 }
 
-if (data.date !== today) {
-    data.date = today;
 
-    data.prayers = {
-        subh: false,
-        zohr: false,
-        esr: false,
-        megrib: false,
-        isa: false
-    };
-}
 
-buttons.forEach(btn => {
+function createDay(date){
 
-    const prayer = btn.dataset.prayer;
+    if(!data.days[date]){
 
-    if (data.prayers[prayer]) {
-        btn.textContent = "✅";
-        btn.classList.add("done");
+        data.days[date] = {
+
+            subh:false,
+            zohr:false,
+            esr:false,
+            megrib:false,
+            isa:false
+
+        };
+
     }
-    btn.addEventListener("dblclick", () => {
 
-    if (!editMode) return;
-
-    if (!data.prayers[prayer]) return;
-
-    data.prayers[prayer] = false;
-    if (data.history[monthKey][prayer] > 0) {
-    data.history[monthKey][prayer]--;
 }
+function loadDay(date){
 
-btn.textContent = "⬜";
-btn.classList.remove("done");
+    createDay(date);
 
-localStorage.setItem("namazData", JSON.stringify(data));
-if (stats.style.display === "block") {
-    updateStats();
-}
 
-});
+    todayElement.textContent = 
+        "Tarix: " + date;
 
-    btn.addEventListener("click", () => {
 
-        if (data.prayers[prayer]) return;
+    buttons.forEach(btn=>{
 
-        selectedPrayer = prayer;
-        selectedButton = btn;
 
-        confirmText.textContent =
-        btn.parentElement.dataset.name + " namazını qıldığına əminsən?";
+        let prayer = btn.dataset.prayer;
 
-        confirmBox.style.display = "flex";
+
+        if(data.days[date][prayer]){
+
+
+            btn.textContent = "✅";
+
+            btn.classList.add("done");
+
+
+        }else{
+
+
+            btn.textContent = "⬜";
+
+            btn.classList.remove("done");
+
+
+        }
+
 
     });
 
-});
-okBtn.addEventListener("click", () => {
 
-    if (!selectedPrayer) return;
-
-    data.prayers[selectedPrayer] = true;
-    data.history[monthKey][selectedPrayer]++;
-
-    selectedButton.textContent = "✅";
-    selectedButton.classList.add("done");
-
-    localStorage.setItem("namazData", JSON.stringify(data));
-    
-    if (stats.style.display === "block") {
-    updateStats();
 }
 
-    confirmBox.style.display = "none";
 
-    selectedPrayer = "";
-    selectedButton = null;
+
+loadDay(selectedDate);
+
+
+
+buttons.forEach(btn=>{
+
+
+    btn.addEventListener("click", ()=>{
+
+
+        let prayer = btn.dataset.prayer;
+
+
+        createDay(selectedDate);
+
+
+        data.days[selectedDate][prayer] =
+            !data.days[selectedDate][prayer];
+
+
+        saveData();
+
+
+        loadDay(selectedDate);
+
+
+        if(stats.style.display === "block"){
+
+            updateStats();
+
+        }
+
+
+    });
+
 
 });
 
-cancelBtn.addEventListener("click", () => {
 
-    confirmBox.style.display = "none";
 
-    selectedPrayer = "";
-    selectedButton = null;
+statsBtn.addEventListener("click", ()=>{
 
-});
 
-function updateStats() {
+    if(stats.style.display === "block"){
 
-    monthTitle.textContent = selectedMonth;
 
-    if (!data.history[selectedMonth]) {
-        data.history[selectedMonth] = {
-            subh: 0,
-            zohr: 0,
-            esr: 0,
-            megrib: 0,
-            isa: 0,
-            completedDays: 0,
-            streak: 0,
-            bestStreak: 0
-        };
+        stats.style.display = "none";
+
+
+    }else{
+
+
+        stats.style.display = "block";
+
+
+        updateStats();
+
+
     }
 
-    const m = data.history[selectedMonth];
 
-    const daysInMonth = new Date(
-        Number(selectedMonth.substring(0, 4)),
-        Number(selectedMonth.substring(5, 7)),
+});
+function changeDay(amount){
+
+
+    let date = new Date(selectedDate);
+
+
+    date.setDate(date.getDate() + amount);
+
+
+
+    let newDate = date.toISOString().split("T")[0];
+
+
+
+    if(newDate < data.firstDate){
+
+        return;
+
+    }
+
+
+
+    let current = new Date();
+
+
+    if(date > current){
+
+        return;
+
+    }
+
+
+
+    selectedDate = newDate;
+
+
+    loadDay(selectedDate);
+
+
+}
+
+
+
+prevDay.addEventListener("click", ()=>{
+
+
+    changeDay(-1);
+
+
+});
+
+
+
+nextDay.addEventListener("click", ()=>{
+
+
+    changeDay(1);
+
+
+});
+function updateStats(){
+
+
+    let counts = {
+
+        subh:0,
+        zohr:0,
+        esr:0,
+        megrib:0,
+        isa:0
+
+    };
+
+
+
+    let daysInMonth = new Date(
+
+        selectedMonth.substring(0,4),
+
+        selectedMonth.substring(5,7),
+
         0
+
     ).getDate();
 
-    const total =
-        m.subh +
-        m.zohr +
-        m.esr +
-        m.megrib +
-        m.isa;
 
-    const maxTotal = daysInMonth * 5;
-    const percent = Math.round((total / maxTotal) * 100);
 
-    statsContent.innerHTML = `
-        <h3>${selectedMonth}</h3>
 
-        🕌 Sübh: ${m.subh}/${daysInMonth}<br>
-        🕌 Zöhr: ${m.zohr}/${daysInMonth}<br>
-        🕌 Əsr: ${m.esr}/${daysInMonth}<br>
-        🕌 Məğrib: ${m.megrib}/${daysInMonth}<br>
-        🕌 İşa: ${m.isa}/${daysInMonth}<br><br>
+    Object.keys(data.days).forEach(date=>{
 
-        ✅ Ümumi: ${total}/${maxTotal}<br>
-        📈 ${percent}%
-    `;
+
+        if(date.startsWith(selectedMonth)){
+
+
+            let day = data.days[date];
+
+
+
+            Object.keys(counts).forEach(prayer=>{
+
+
+                if(day[prayer]){
+
+
+                    counts[prayer]++;
+
+
+                }
+
+
+            });
+
+
+        }
+
+
+    });
+
+
+
+    subhStat.textContent =
+        counts.subh + "/" + daysInMonth;
+
+
+    zohrStat.textContent =
+        counts.zohr + "/" + daysInMonth;
+
+
+    esrStat.textContent =
+        counts.esr + "/" + daysInMonth;
+
+
+    megribStat.textContent =
+        counts.megrib + "/" + daysInMonth;
+
+
+    isaStat.textContent =
+        counts.isa + "/" + daysInMonth;
+
+}
+const monthNames = [
+    "Yanvar",
+    "Fevral",
+    "Mart",
+    "Aprel",
+    "May",
+    "İyun",
+    "İyul",
+    "Avqust",
+    "Sentyabr",
+    "Oktyabr",
+    "Noyabr",
+    "Dekabr"
+];
+
+
+function updateMonthTitle(){
+
+
+    let year = selectedMonth.substring(0,4);
+
+    let month = Number(
+        selectedMonth.substring(5,7)
+    ) - 1;
+
+
+
+    monthTitle.textContent =
+        monthNames[month] + " - " + year;
+
+
 }
 
-statsBtn.addEventListener("click", () => {
 
-    stats.style.display =
-        stats.style.display === "none" ? "block" : "none";
 
-updateStats();
+updateMonthTitle();
 
-});
 
-localStorage.setItem("namazData", JSON.stringify(data));
 
-editBtn.addEventListener("click", () => {
+prevMonth.addEventListener("click", ()=>{
 
-    editMode = !editMode;
 
-    if (editMode) {
-        editBtn.textContent = "✅ Düzəliş rejimi aktivdir";
-    } else {
-        editBtn.textContent = "✏️ Düzəliş et";
-    }
-
-});
-prevMonth.addEventListener("click", () => {
     let date = new Date(selectedMonth + "-01");
+
+
     date.setMonth(date.getMonth() - 1);
 
-    selectedMonth =
-        date.getFullYear() + "-" +
-        String(date.getMonth() + 1).padStart(2, "0");
 
-    updateStats();
+    let newMonth =
+        date.toISOString().substring(0,7);
+
+
+
+    if(newMonth < data.firstDate.substring(0,7)){
+
+        return;
+
+    }
+
+
+
+    selectedMonth = newMonth;
+
+
+    updateMonthTitle();
+
+
+    if(stats.style.display === "block"){
+
+        updateStats();
+
+    }
+
+
 });
 
-nextMonth.addEventListener("click", () => {
+
+
+nextMonth.addEventListener("click", ()=>{
+
+
     let date = new Date(selectedMonth + "-01");
+
+
     date.setMonth(date.getMonth() + 1);
 
-    selectedMonth =
-        date.getFullYear() + "-" +
-        String(date.getMonth() + 1).padStart(2, "0");
+
+
+    let newMonth =
+        date.toISOString().substring(0,7);
+
+
+
+    let currentMonth =
+        today.substring(0,7);
+
+
+
+    if(newMonth > currentMonth){
+
+        return;
+
+    }
+
+
+
+    selectedMonth = newMonth;
+
+
+    updateMonthTitle();
+
+
+    if(stats.style.display === "block"){
+
+        updateStats();
+
+    }
+
+
+});
+saveData();
+
+
+// Statistika açıqdırsa ilk məlumatı göstər
+if(stats.style.display === "block"){
 
     updateStats();
-});
+
+}
