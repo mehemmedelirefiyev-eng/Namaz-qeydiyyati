@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namaz Qeydiyyatı</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <div class="container">
+
+        <h1>🕌 Namaz Qeydiyyatı</h1>
+        <div class="date-control">
+
+    <button id="prevDay">⬅️</button>
+
+    <p id="today"></p>
+
+    <button id="nextDay">➡️</button>
+
+</div>
+
+        <div class="prayer" data-name="Sübh">
+            <span>Sübh</span>
+            <button class="check-btn" data-prayer="subh">⬜</button>
+        </div>
+
+        <div class="prayer" data-name="Zöhr">
+            <span>Zöhr</span>
+            <button class="check-btn" data-prayer="zohr">⬜</button>
+        </div>
+
+        <div class="prayer" data-name="Əsr">
+            <span>Əsr</span>
+            <button class="check-btn" data-prayer="esr">⬜</button>
+        </div>
+
+        <div class="prayer" data-name="Məğrib">
+            <span>Məğrib</span>
+            <button class="check-btn" data-prayer="megrib">⬜</button>
+        </div>
+
+        <div class="prayer" data-name="İşa">
+            <span>İşa</span>
+            <button class="check-btn" data-prayer="isa">⬜</button>
+        </div>
+        
+
+        <button id="statsBtn">📊 Statistika</button>
+
+        <div id="stats" style="display:none;">
+    <h2>Aylıq statistika</h2>
+
+    <div class="month-controls">
+
+    <button id="prevMonth">⬅️</button>
+
+    <span id="monthTitle"></span>
+
+    <button id="nextMonth">➡️</button>
+
+</div>
+
+
+<div class="namaz-stats">
+
+    <p>Sübh: <span id="subhStat">0/0</span></p>
+
+    <p>Zöhr: <span id="zohrStat">0/0</span></p>
+
+    <p>Əsr: <span id="esrStat">0/0</span></p>
+
+    <p>Məğrib: <span id="megribStat">0/0</span></p>
+
+    <p>İşa: <span id="isaStat">0/0</span></p>
+
+</div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
